@@ -1,79 +1,114 @@
 #!/usr/bin/python3
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from decimal import *
 import random
 from copy import deepcopy
 
 
+class Config:
+    """
+    How to perform this calc
+    """
+
+    def __init__(self, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations):
+        self.likelihood_h_1 = likelihood_h_1
+        self.likelihood_h_2 = likelihood_h_2
+        self.prior_h_1 = prior_h_1
+        self.prior_h_2 = prior_h_2
+        self.iterations = iterations
+        self.iteration_to_start_reevaluation = 0
+        self.reevaluation_likelihood_adjustment_low = 0
+        self.reevaluation_likelihood_adjustment_high = 0
+        self.is_iterative = False
+        self.evidence_reevaluations = []
+
+
 class BayesItem:
-    def __init__(self, position, likelihood_H_1, prior_H_1, likelihood_H_2, prior_H_2):
-        self.Position = position
-        self.Likelihood_H_1 = likelihood_H_1
-        self.Likelihood_H_2 = likelihood_H_2
-        self.Prior_H_1 = prior_H_1
-        self.Prior_H_2 = prior_H_2
-        self.Posterior_H_1 = 0.0
-        self.Posterior_H_2 = 0.0
-        self.Calculate_Posterior()
+    """
+    The item we'll calculate on
+    """
 
-    def Calculate_Posterior(self):
-        #                    Likelihood(H_1)	    Prior(H_1)	      Likelihood(MG)	      Prior(H1)	        Likelihood(MB)	       Prior(H2)
-        self.Posterior_H_1 = (self.Likelihood_H_1 * self.Prior_H_1) / ((self.Likelihood_H_1 * self.Prior_H_1) + (self.Likelihood_H_2 * self.Prior_H_2))
-        self.Posterior_H_2 = (self.Likelihood_H_2 * self.Prior_H_2) / ((self.Likelihood_H_2 * self.Prior_H_2) + (self.Likelihood_H_1 * self.Prior_H_1))
+    def __init__(self, position, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2):
+        self.position = position
+        self.likelihood_h_1 = likelihood_h_1
+        self.likelihood_h_2 = likelihood_h_2
+        self.prior_h_1 = prior_h_1
+        self.prior_h_2 = prior_h_2
+        self.posterior_h_1 = 0.0
+        self.posterior_h_2 = 0.0
+        self.calculate_posterior()
 
-        self.Posterior_H_1 = normalize(self.Posterior_H_1)
-        self.Posterior_H_2 = normalize(self.Posterior_H_2)
+    def calculate_posterior(self):
+        """
+        Bayes calculation e.g.
+                             Likelihood(H_1)	    Prior(H_1)	      Likelihood(MG)	      Prior(H1)	        Likelihood(MB)	       Prior(H2)
+        """
+        self.posterior_h_1 = (self.likelihood_h_1 * self.prior_h_1) / ((self.likelihood_h_1 * self.prior_h_1) + (self.likelihood_h_2 * self.prior_h_2))
+        self.posterior_h_2 = (self.likelihood_h_2 * self.prior_h_2) / ((self.likelihood_h_2 * self.prior_h_2) + (self.likelihood_h_1 * self.prior_h_1))
+
+        self.posterior_h_1 = normalize(self.posterior_h_1)
+        self.posterior_h_2 = normalize(self.posterior_h_2)
 
 
-def Bayes(Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2, iterations):
+def bayes(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations):
+    """
+    straight iterative bayes calculation, where priors become the previous posterior
+    """
     items = []
     for i in range(iterations):
-        b = BayesItem(i, Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2)
+        b = BayesItem(i, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
         items.append(b)
-        Prior_H_1 = b.Posterior_H_1
-        Prior_H_2 = b.Posterior_H_2
+        # priors for the next are this iterations posterior
+        prior_h_1 = b.posterior_h_1
+        prior_h_2 = b.posterior_h_2
     return items
 
 
-def SingleUpdate(Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2, iterations, iterationToUpdate, varianceLow, varianceHigh):
-    original_likelihood_H_1 = Likelihood_H_1
-    original_likelihood_H_2 = Likelihood_H_2
+def single_update(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, iteration_to_update, variance_low, variance_high):
+    """
+    one belief update, then return to normal likelihoods
+    """
+    original_likelihood_h_1 = likelihood_h_1
+    original_likelihood_h_2 = likelihood_h_2
     items = []
-
     for i in range(iterations):
-        if i == iterationToUpdate:
-            # Change in belief changes the likelihood, not the prior
-            change = random.uniform(varianceLow, varianceHigh)
-            Likelihood_H_1 = normalize(Likelihood_H_1 + change)
-            Likelihood_H_2 = normalize(Likelihood_H_2 + (1-abs(change)))
+        if i == iteration_to_update:
+            # Change in belief changes the likelihood, not the prior or posterior (that would be "magic")
+            change = random.uniform(variance_low, variance_high)
+            likelihood_h_1 = normalize(likelihood_h_1 + change)
+            likelihood_h_2 = normalize(likelihood_h_2 + (1-abs(change)))
         else:
-            Likelihood_H_1 = original_likelihood_H_1
-            Likelihood_H_2 = original_likelihood_H_2
+            likelihood_h_1 = original_likelihood_h_1
+            likelihood_h_2 = original_likelihood_h_2
 
-        b = BayesItem(i, Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2)
+        b = BayesItem(i, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
         items.append(b)
-        Prior_H_1 = b.Posterior_H_1
-        Prior_H_2 = b.Posterior_H_2
+        prior_h_1 = b.posterior_h_1
+        prior_h_2 = b.posterior_h_2
     return items
 
 
-def Iterative(Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2, iterations, iterationToUpdate, varianceLow, varianceHigh):
+def iterative(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, iteration_to_update, variance_low, variance_high):
+    """
+    Continue to update in the same one fashion until convergence
+    So for each iteration above our belief change, we recalculate likelihoods
+    """
     items = []
     for i in range(iterations):
-        if i >= iterationToUpdate:
-            change = random.uniform(varianceLow, varianceHigh)
-            Likelihood_H_1 = normalize(Likelihood_H_1 + change)
-            Likelihood_H_2 = normalize(Likelihood_H_2 + (1-abs(change)))
+        if i >= iteration_to_update:
+            change = random.uniform(variance_low, variance_high)
+            likelihood_h_1 = normalize(likelihood_h_1 + change)
+            likelihood_h_2 = normalize(likelihood_h_2 + (1-abs(change)))
 
-        b = BayesItem(i, Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2)
+        b = BayesItem(i, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
         items.append(b)
-        Prior_H_1 = b.Posterior_H_1
-        Prior_H_2 = b.Posterior_H_2
+        prior_h_1 = b.posterior_h_1
+        prior_h_2 = b.posterior_h_2
     return items
 
 
-def Lookback(Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2, iterations, iterationToUpdate, varianceLow, varianceHigh, isIterative):
+def lookback(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, iteration_to_update, variance_low, variance_high, is_iterative):
     """
     1
     11
@@ -126,60 +161,61 @@ def Lookback(Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2, iterations, i
     [that is, we compute the beliefs after E + F that we would have had if we had been using the P*s from
     the very beginning]
     """
-    original_likelihood_H_1 = Likelihood_H_1
-    original_likelihood_H_2 = Likelihood_H_2
+    original_likelihood_h_1 = likelihood_h_1
+    original_likelihood_h_2 = likelihood_h_2
     items = []
     for i in range(iterations):
-        if isIterative:
-            if i >= iterationToUpdate:
+        if is_iterative:
+            if i >= iteration_to_update:
                 lookback_items = []
                 for update_count, item in enumerate(items):
                     if update_count == 1:
-                        Prior_H_1 = item.Posterior_H_1
-                        Prior_H_2 = item.Posterior_H_2
+                        prior_h_1 = item.posterior_h_1
+                        prior_h_2 = item.posterior_h_2
 
-                    change = random.uniform(varianceLow, varianceHigh)
-                    Likelihood_H_1 = normalize(item.Likelihood_H_1 + change)
-                    Likelihood_H_2 = normalize(item.Likelihood_H_2 + (1-abs(change)))
+                    change = random.uniform(variance_low, variance_high)
+                    likelihood_h_1 = normalize(item.likelihood_h_1 + change)
+                    likelihood_h_2 = normalize(item.likelihood_h_2 + (1-abs(change)))
 
-                    lookback_item = BayesItem(update_count, Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2)
+                    lookback_item = BayesItem(update_count, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
                     lookback_items.append(lookback_item)
 
                     # set item's priors to iteration's prior
-                    Prior_H_1 = lookback_item.Posterior_H_1
-                    Prior_H_2 = lookback_item.Posterior_H_2
+                    prior_h_1 = lookback_item.posterior_h_1
+                    prior_h_2 = lookback_item.posterior_h_2
             else:
-                Likelihood_H_1 = original_likelihood_H_1
-                Likelihood_H_2 = original_likelihood_H_2
+                likelihood_h_1 = original_likelihood_h_1
+                likelihood_h_2 = original_likelihood_h_2
         else:
-            if i == iterationToUpdate:
+            # just do the lookback in the iteration_to_update array
+            if i == iteration_to_update:
                 lookback_items = []
                 for update_count, item in enumerate(items):
                     if update_count == 1:
-                        Prior_H_1 = item.Posterior_H_1
-                        Prior_H_2 = item.Posterior_H_2
+                        prior_h_1 = item.posterior_h_1
+                        prior_h_2 = item.posterior_h_2
 
-                        change = random.uniform(varianceLow, varianceHigh)
-                        Likelihood_H_1 = normalize(item.Likelihood_H_1 + change)
-                        Likelihood_H_2 = normalize(item.Likelihood_H_2 + (1-abs(change)))
+                        change = random.uniform(variance_low, variance_high)
+                        likelihood_h_1 = normalize(item.likelihood_h_1 + change)
+                        likelihood_h_2 = normalize(item.likelihood_h_2 + (1-abs(change)))
                     else:
-                        Likelihood_H_1 = original_likelihood_H_1
-                        Likelihood_H_2 = original_likelihood_H_2
+                        likelihood_h_1 = original_likelihood_h_1
+                        likelihood_h_2 = original_likelihood_h_2
 
-                    lookback_item = BayesItem(update_count, Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2)
+                    lookback_item = BayesItem(update_count, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
                     lookback_items.append(lookback_item)
 
                     # set item's priors to iteration's prior
-                    Prior_H_1 = lookback_item.Posterior_H_1
-                    Prior_H_2 = lookback_item.Posterior_H_2
+                    prior_h_1 = lookback_item.posterior_h_1
+                    prior_h_2 = lookback_item.posterior_h_2
             else:
-                Likelihood_H_1 = original_likelihood_H_1
-                Likelihood_H_2 = original_likelihood_H_2
+                likelihood_h_1 = original_likelihood_h_1
+                likelihood_h_2 = original_likelihood_h_2
 
-        b = BayesItem(i, Likelihood_H_1, Prior_H_1, Likelihood_H_2, Prior_H_2)
+        b = BayesItem(i, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
         items.append(b)
-        Prior_H_1 = b.Posterior_H_1
-        Prior_H_2 = b.Posterior_H_2
+        prior_h_1 = b.posterior_h_1
+        prior_h_2 = b.posterior_h_2
 
     return items
 
@@ -194,39 +230,39 @@ def normalize(n):
 
 getcontext().prec = 5
 
-iterations = 25
-iterationToStartReEvaluation = 7
-reEvaluationLow = -.03
-reEvaluationHigh = -.03
-likelihood_H_1 = .6
-likelihood_H_2 = .4
-prior_H_1 = .5
-prior_H_2 = .5
+ITERATIONS = 25
+ITERATIONTOSTARTREEVALUATION = 7
+REEVALUATIONLOW = -.3
+REEVALUATIONHIGH = -.3
+LIKELIHOOD_H_1 = .6
+LIKELIHOOD_H_2 = .4
+PRIOR_H_1 = .5
+PRIOR_H_2 = .5
+LOOKBACKREEVALUATIONS = [1, 3, 5, 7, 8, 9, 15, 16]
 
 
-results1 = Bayes(likelihood_H_1, prior_H_1, likelihood_H_2, prior_H_2,
-                 iterations)
-# for i, result in enumerate(results1):
-# print(str(i) + "," + "{:5f}".format(result.Posterior_H_1) + "," + "{:5f}".format(result.Prior_H_1))
-# print("{:5f}".format(result.Posterior_H_1))
+config = Config(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS)
+config.iteration_to_start_reevaluation = ITERATIONTOSTARTREEVALUATION
+config.reevaluation_likelihood_adjustment_low = REEVALUATIONLOW
+config.reevaluation_likelihood_adjustment_high = REEVALUATIONHIGH
+config.is_iterative = False
+config.evidence_reevaluations = []
 
-results2 = SingleUpdate(likelihood_H_1, prior_H_1, likelihood_H_2, prior_H_2,
-                        iterations, iterationToStartReEvaluation, reEvaluationLow, reEvaluationHigh)
-# for i, result in enumerate(results2):
-# print(str(i) + "," + "{:5f}".format(result.Posterior_H_1) + "," + "{:5f}".format(result.Prior_H_1))
-# print("{:5f}".format(result.Posterior_H_1)
+results1 = bayes(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS)
 
-results3 = Iterative(likelihood_H_1, prior_H_1, likelihood_H_2, prior_H_2,
-                     iterations, iterationToStartReEvaluation, reEvaluationLow, reEvaluationHigh)
-# for i, result in enumerate(results2):
-# print(str(i) + "," + "{:5f}".format(result.Posterior_H_1) + "," + "{:5f}".format(result.Prior_H_1))
-# print("{:5f}".format(result.Posterior_H_1)
+results2 = single_update(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
+                         ITERATIONTOSTARTREEVALUATION, REEVALUATIONLOW, REEVALUATIONHIGH)
 
-results4 = Lookback(likelihood_H_1, prior_H_1, likelihood_H_2, prior_H_2,
-                    iterations, iterationToStartReEvaluation, reEvaluationLow, reEvaluationHigh, False)
+results3 = iterative(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
+                     ITERATIONTOSTARTREEVALUATION, REEVALUATIONLOW, REEVALUATIONHIGH)
 
-results5 = Lookback(likelihood_H_1, prior_H_1, likelihood_H_2, prior_H_2,
-                    iterations, iterationToStartReEvaluation, reEvaluationLow, reEvaluationHigh, True)
+results4 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
+                    ITERATIONTOSTARTREEVALUATION, REEVALUATIONLOW, REEVALUATIONHIGH, False)
+
+results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
+                    ITERATIONTOSTARTREEVALUATION, REEVALUATIONLOW, REEVALUATIONHIGH, True)
+
+
 # for i, result in enumerate(results3):
 # print(str(i) + "," + "{:5f}".format(result.Posterior_H_1) +
 #       "," + "{:5f}".format(result.Prior_H_1))
@@ -234,57 +270,10 @@ results5 = Lookback(likelihood_H_1, prior_H_1, likelihood_H_2, prior_H_2,
 
 
 print("E  ,Bayes,Single,Iterative,LookbackSingle,LookbackIterative")
-for i in range(iterations):
+for i in range(ITERATIONS):
     print("{0:03d}".format(i) + "," +
-          "{:5f}".format(results1[i].Posterior_H_1) + "," +
-          "{:5f}".format(results2[i].Posterior_H_1) + "," +
-          "{:5f}".format(results3[i].Posterior_H_1) + "," +
-          "{:5f}".format(results4[i].Posterior_H_1) + "," +
-          "{:5f}".format(results5[i].Posterior_H_1))
-
-exit(1)
-
-
-# ------------------
-
-x = []
-y = []
-x2 = []
-y2 = []
-i = 0
-for result in results:
-    print("{:5f}".format(result.Posterior_H_1) +
-          "," + "{:5f}".format(result.Posterior_H_2))
-
-    # x axis values
-    y.append("{:2f}".format(result.Posterior_H_1))
-    # corresponding y axis values
-    x.append(i)
-    y2.append("{:2f}".format(result.Posterior_H_2))
-    # corresponding y axis values
-    x2.append(i)
-    i += 1
-
-# plotting the points
-
-plt.scatter(x, y)
-plt.scatter(x2, y2)
-plt.plot(x, y, label="Posterior_H_1")
-plt.plot(x2, y2, label="Posterior_H_2")
-plt.legend()
-
-
-plt.ylim(0, 25)
-plt.xlim(0, 25)
-
-
-# naming the x axis
-plt.xlabel("Evidence Position")
-# naming the y axis
-plt.ylabel("Belief")
-
-# giving a title to my graph
-plt.title("EM")
-
-# function to show the plot
-plt.show()
+          "{:5f}".format(results1[i].posterior_h_1) + "," +
+          "{:5f}".format(results2[i].posterior_h_1) + "," +
+          "{:5f}".format(results3[i].posterior_h_1) + "," +
+          "{:5f}".format(results4[i].posterior_h_1) + "," +
+          "{:5f}".format(results5[i].posterior_h_1))
