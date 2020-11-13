@@ -6,21 +6,12 @@ import random
 from copy import deepcopy
 
 
-class Config:
-    """
-    How to perform this calc
-    """
-
-    def __init__(self, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations):
-        self.likelihood_h_1 = likelihood_h_1
-        self.likelihood_h_2 = likelihood_h_2
-        self.prior_h_1 = prior_h_1
-        self.prior_h_2 = prior_h_2
-        self.iterations = iterations
-        self.iteration_to_start_reevaluation = 0
-        self.reevaluation_likelihood_adjustment_low = 0
-        self.reevaluation_likelihood_adjustment_high = 0
-        self.evidence_reevaluations = []
+class ReevaluationOfPriorEvidence:
+    def __init__(self, causing_evidence_postion, priors_to_be_updated, belief_change_low, belief_change_high):
+        self.causing_evidence_postion = causing_evidence_postion
+        self.priors_to_be_updated = priors_to_be_updated
+        self.belief_change_low = belief_change_low
+        self.belief_change_high = belief_change_high
 
 
 class BayesItem:
@@ -107,7 +98,7 @@ def iterative(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, 
     return items
 
 
-def lookback(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, iteration_to_update, variance_low, variance_high, lookback_reevaluations, is_debug=False):
+def lookback(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, reevaluations, is_debug=False):
     """
     My use of E and F was just to distinguish between the evidence received before
     the “realization moment” and the evidence received after it (respectively).
@@ -161,58 +152,62 @@ def lookback(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, i
     333333333
 
     """
-    original_likelihood_h_1 = likelihood_h_1
-    original_likelihood_h_2 = likelihood_h_2
     items = []
 
+    original_likelihood_h_1 = likelihood_h_1
+    original_likelihood_h_2 = likelihood_h_2
+
     for i in range(iterations):
-        if i >= iteration_to_update:  # where the potential for reevaluation begins
-            if i in lookback_reevaluations:
-                lookback_items = []
-                for update_count, item in enumerate(items):
-                    if update_count == 0:
-                        prior_h_1 = item.prior_h_1
-                        prior_h_2 = item.prior_h_2
+        reevaluation = None
+        for r in reevaluations:
+            if r.causing_evidence_postion == i:
+                reevaluation = r
 
-                    item_original_likelihood_h_1 = item.likelihood_h_1
-                    item_original_likelihood_h_2 = item.likelihood_h_2
+        # is this a new E that causes reevaluation?
+        if reevaluation:
+            lookback_items = []
+            # go back and reevaluate all items to this point
+            for update_count, item in enumerate(items):
+                # previous E originals
+                item_original_likelihood_h_1 = item.likelihood_h_1
+                item_original_likelihood_h_2 = item.likelihood_h_2
+                if update_count == 0:
+                    prior_h_1 = item.prior_h_1
+                    prior_h_2 = item.prior_h_2
 
-                    x = ""
-                    # is this a reevalution E?
-                    if update_count in lookback_reevaluations:
-                        change = random.uniform(variance_low, variance_high)
-                        likelihood_h_1 = normalize(item.likelihood_h_1 + change)
-                        likelihood_h_2 = normalize(item.likelihood_h_2 + (1-abs(change)))
-                        x = "reevaluation likelihood " + str(likelihood_h_1)
-                    else:
-                        likelihood_h_1 = item_original_likelihood_h_1
-                        likelihood_h_2 = item_original_likelihood_h_2
-                        x = "straight " + str(likelihood_h_1)
+                # is this a previous E to reevaluate?
+                if update_count in r.priors_to_be_updated:
+                    change = random.uniform(r.belief_change_low, r.belief_change_high)
+                    likelihood_h_1 = normalize(item.likelihood_h_1 + change)
+                    likelihood_h_2 = normalize(item.likelihood_h_2 + (1-abs(change)))
+                else:
+                    likelihood_h_1 = item_original_likelihood_h_1
+                    likelihood_h_2 = item_original_likelihood_h_2
 
-                    lookback_item = BayesItem(update_count, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
-                    lookback_items.append(lookback_item)
+                lookback_item = BayesItem(update_count, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
+                lookback_items.append(lookback_item)
 
-                    # set item's priors to iteration's prior
-                    prior_h_1 = lookback_item.posterior_h_1
-                    prior_h_2 = lookback_item.posterior_h_2
-                    if is_debug:
-                        print(str(i) + " " + str(update_count) + " " + x)
+                if is_debug:
+                    print("{0:03d}".format(i) + "," +
+                          "{0:03d}".format(update_count) + "," + str(likelihood_h_1) + "," +
+                          "{:5f}".format(prior_h_1) + "," + "{:5f}".format(lookback_item.posterior_h_1) + "," +
+                          "{:5f}".format(prior_h_2) + "," + "{:5f}".format(lookback_item.posterior_h_2))
 
-            else:  # evaluate as normal
-                likelihood_h_1 = original_likelihood_h_1
-                likelihood_h_2 = original_likelihood_h_2
+                prior_h_1 = lookback_item.posterior_h_1
+                prior_h_2 = lookback_item.posterior_h_2
 
-            # this is the summary lookback calculation
-            b = BayesItem(i, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
-            # we don't add this to a list, we just need it's output
-            prior_h_1 = b.posterior_h_1
-            prior_h_2 = b.posterior_h_2
-
-        if is_debug:
-            print(str(i) + " " + str(prior_h_1))
+        likelihood_h_1 = original_likelihood_h_1
+        likelihood_h_2 = original_likelihood_h_2
 
         b = BayesItem(i, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
         items.append(b)
+
+        if is_debug:
+            print("{0:03d}".format(i) + "," +
+                  "000," + str(likelihood_h_1) + "," +
+                  "{:5f}".format(prior_h_1) + "," + "{:5f}".format(b.posterior_h_1) + "," +
+                  "{:5f}".format(prior_h_2) + "," + "{:5f}".format(b.posterior_h_2))
+
         prior_h_1 = b.posterior_h_1
         prior_h_2 = b.posterior_h_2
 
@@ -227,25 +222,29 @@ def normalize(n):
     return n
 
 
+print("""
+ ________  ____    ____  
+|_   __  ||_   \  /   _| 
+  | |_ \_|  |   \/   |   
+  |  _| _   | |\  /| |   
+ _| |__/ | _| |_\/_| |_  
+|________||_____||_____| 
+                         """)
+
 getcontext().prec = 5
 
 ITERATIONS = 25
-ITERATIONTOSTARTREEVALUATION = 7
-# for reevaluation, this array needs to contain the start iteration number
-LOOKBACKREEVALUATIONS = [1, 3, 5, 7, 8, 9, 15, 16]
-REEVALUATIONLOW = -.3
-REEVALUATIONHIGH = -.3
 LIKELIHOOD_H_1 = .6
 LIKELIHOOD_H_2 = .4
 PRIOR_H_1 = .5
 PRIOR_H_2 = .5
+ITERATIONTOSTARTREEVALUATION = 7
+REEVALUATIONLOW = -.3
+REEVALUATIONHIGH = -.3
 
+DEBUG = True
 
-config = Config(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS)
-config.iteration_to_start_reevaluation = ITERATIONTOSTARTREEVALUATION
-config.reevaluation_likelihood_adjustment_low = REEVALUATIONLOW
-config.reevaluation_likelihood_adjustment_high = REEVALUATIONHIGH
-config.evidence_reevaluations = LOOKBACKREEVALUATIONS
+print("i,update_i,likelihood_h_1,lookback_item.prior_h_1,lookback_item.posterior_h_1,lookback_item.prior_h_2,lookback_item.posterior_h_2")
 
 results1 = bayes(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS)
 
@@ -255,11 +254,19 @@ results2 = single_update(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, I
 results3 = iterative(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
                      ITERATIONTOSTARTREEVALUATION, REEVALUATIONLOW, REEVALUATIONHIGH)
 
-results4 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
-                    ITERATIONTOSTARTREEVALUATION, REEVALUATIONLOW, REEVALUATIONHIGH, [2, 4, 7])
+reevaluations = []
+reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [2, 4], REEVALUATIONLOW, REEVALUATIONHIGH))
 
-results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
-                    ITERATIONTOSTARTREEVALUATION, REEVALUATIONLOW, REEVALUATIONHIGH, [5, 6, 7], True)
+results4 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
+
+if DEBUG:
+    print("")
+    print("")
+
+reevaluations = []
+reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [5, 6], REEVALUATIONLOW, REEVALUATIONHIGH))
+
+results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
 
 # for i, result in enumerate(results3):
@@ -267,7 +274,7 @@ results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERAT
 #       "," + "{:5f}".format(result.Prior_H_1))
 # print("{:5f}".format(result.Posterior_H_1))
 
-
+print("")
 print("E  ,Bayes,Single,Iterative,LookbackSingle,LookbackIterative")
 for i in range(ITERATIONS):
     print("{0:03d}".format(i) + "," +
