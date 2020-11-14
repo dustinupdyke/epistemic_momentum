@@ -7,9 +7,9 @@ from copy import deepcopy
 
 
 class ReevaluationOfPriorEvidence:
-    def __init__(self, causing_evidence_postion, priors_to_be_updated, belief_change_low, belief_change_high):
+    def __init__(self, causing_evidence_postion, prior_evidence_positions_to_be_updated, belief_change_low, belief_change_high):
         self.causing_evidence_postion = causing_evidence_postion
-        self.priors_to_be_updated = priors_to_be_updated
+        self.prior_evidence_positions_to_be_updated = prior_evidence_positions_to_be_updated
         self.belief_change_low = belief_change_low
         self.belief_change_high = belief_change_high
 
@@ -176,7 +176,7 @@ def lookback(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, r
                     prior_h_2 = item.prior_h_2
 
                 # is this a previous E to reevaluate?
-                if update_count in r.priors_to_be_updated:
+                if update_count in r.prior_evidence_positions_to_be_updated:
                     change = random.uniform(r.belief_change_low, r.belief_change_high)
                     likelihood_h_1 = normalize(item.likelihood_h_1 + change)
                     likelihood_h_2 = normalize(item.likelihood_h_2 + (1-abs(change)))
