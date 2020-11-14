@@ -239,10 +239,10 @@ LIKELIHOOD_H_2 = .4
 PRIOR_H_1 = .5
 PRIOR_H_2 = .5
 ITERATIONTOSTARTREEVALUATION = 7
-REEVALUATIONLOW = -.3
-REEVALUATIONHIGH = -.3
+REEVALUATIONLOW = -.5
+REEVALUATIONHIGH = -.5
 
-DEBUG = True
+DEBUG = False
 
 print("i,update_i,likelihood_h_1,lookback_item.prior_h_1,lookback_item.posterior_h_1,lookback_item.prior_h_2,lookback_item.posterior_h_2")
 
@@ -255,24 +255,34 @@ results3 = iterative(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERA
                      ITERATIONTOSTARTREEVALUATION, REEVALUATIONLOW, REEVALUATIONHIGH)
 
 reevaluations = []
-reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [2, 4], REEVALUATIONLOW, REEVALUATIONHIGH))
+reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [1], REEVALUATIONLOW, REEVALUATIONHIGH))
 
 results4 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
-if DEBUG:
-    print("")
-    print("")
-
 reevaluations = []
-reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [5, 6], REEVALUATIONLOW, REEVALUATIONHIGH))
+reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [2], REEVALUATIONLOW, REEVALUATIONHIGH))
 
 results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
+reevaluations = []
+reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [3], REEVALUATIONLOW, REEVALUATIONHIGH))
 
-# for i, result in enumerate(results3):
-# print(str(i) + "," + "{:5f}".format(result.Posterior_H_1) +
-#       "," + "{:5f}".format(result.Prior_H_1))
-# print("{:5f}".format(result.Posterior_H_1))
+results6 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
+
+reevaluations = []
+reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [4], REEVALUATIONLOW, REEVALUATIONHIGH))
+
+results7 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
+
+reevaluations = []
+reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [5], REEVALUATIONLOW, REEVALUATIONHIGH))
+
+results8 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
+
+reevaluations = []
+reevaluations.append(ReevaluationOfPriorEvidence(ITERATIONTOSTARTREEVALUATION, [6], REEVALUATIONLOW, REEVALUATIONHIGH))
+
+results9 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
 print("")
 print("E  ,Bayes,Single,Iterative,LookbackSingle,LookbackIterative")
@@ -282,4 +292,8 @@ for i in range(ITERATIONS):
           "{:5f}".format(results2[i].posterior_h_1) + "," +
           "{:5f}".format(results3[i].posterior_h_1) + "," +
           "{:5f}".format(results4[i].posterior_h_1) + "," +
-          "{:5f}".format(results5[i].posterior_h_1))
+          "{:5f}".format(results5[i].posterior_h_1) + "," +
+          "{:5f}".format(results6[i].posterior_h_1) + "," +
+          "{:5f}".format(results7[i].posterior_h_1) + "," +
+          "{:5f}".format(results8[i].posterior_h_1) + "," +
+          "{:5f}".format(results9[i].posterior_h_1))
