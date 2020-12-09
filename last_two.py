@@ -96,16 +96,16 @@ def iterative(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, 
         if i >= iteration_to_update:
 
             has_processed = False
-            if(i > 1500):
+            if(i > 150):
                 likelihood_h_1 = .51
                 likelihood_h_2 = .49
                 has_processed = True
-            if(i > 1000 and not has_processed):
+            if(i > 100 and not has_processed):
                 likelihood_h_1 = .48
                 likelihood_h_2 = .52
                 has_processed = True
 
-            if(i > 500 and not has_processed):
+            if(i > 50 and not has_processed):
                 likelihood_h_1 = .49
                 likelihood_h_2 = .51
                 has_processed = True
@@ -145,22 +145,17 @@ def lookback(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, r
     print("")
     for i in range(iterations):
 
-        if i > 499 and i < 502:
-            is_debug = True
-        else:
-            is_debug = False
-
         has_processed = False
-        if(i > 1500):
+        if(i > 150):
             original_likelihood_h_1 = .51
             original_likelihood_h_2 = .49
             has_processed = True
-        if(i > 1000 and not has_processed):
+        if(i > 100 and not has_processed):
             original_likelihood_h_1 = .48
             original_likelihood_h_2 = .52
             has_processed = True
 
-        if(i > 500 and not has_processed):
+        if(i > 50 and not has_processed):
             original_likelihood_h_1 = .49
             original_likelihood_h_2 = .51
             has_processed = True
@@ -203,9 +198,14 @@ def lookback(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, r
 
                 if is_debug:
                     DEBUG_RAW.append("{0:03d}".format(i) + "," +
-                                     "{0:03d}".format(update_count) + "," + str(likelihood_h_1) + "," +
-                                     "{:5f}".format(prior_h_1) + "," + "{:5f}".format(lookback_item.posterior_h_1) + "," +
-                                     "{:5f}".format(prior_h_2) + "," + "{:5f}".format(lookback_item.posterior_h_2) + "," + str(reevaluation.causing_evidence_postion) + "," + str(reevaluation.prior_evidence_positions_to_be_updated))
+                                     "{0:03d}".format(update_count) + "," +
+                                     str(likelihood_h_1) + "," +
+                                     "{:5f}".format(prior_h_1) + "," +
+                                     "{:5f}".format(lookback_item.posterior_h_1) + "," +
+                                     "{:5f}".format(prior_h_2) + "," +
+                                     "{:5f}".format(lookback_item.posterior_h_2) + "," +
+                                     str(reevaluation.causing_evidence_postion) + "," +
+                                     str(reevaluation.prior_evidence_positions_to_be_updated))
 
                 prior_h_1 = lookback_item.posterior_h_1
                 prior_h_2 = lookback_item.posterior_h_2
@@ -247,7 +247,7 @@ print("""
 
 getcontext().prec = 5
 
-ITERATIONS = 2000
+ITERATIONS = 200
 LIKELIHOOD_H_1 = .51
 LIKELIHOOD_H_2 = .49
 PRIOR_H_1 = .5
@@ -263,42 +263,34 @@ DEBUG_REEVALS = []
 # if (DEBUG):
 #     print("i,update_i,likelihood_h_1,lookback_item.prior_h_1,lookback_item.posterior_h_1,lookback_item.prior_h_2,lookback_item.posterior_h_2")
 
-# results1 = bayes(.51, PRIOR_H_1, .49, PRIOR_H_2, ITERATIONS)
-# results2 = bayes(.49, PRIOR_H_1, .51, PRIOR_H_2, ITERATIONS)
-
-
-# results3 = iterative(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
-#                     ITERATIONTOSTARTREEVALUATION, REEVALUATION_H_1, REEVALUATION_H_2)
-
 reevaluations = []
 evidence_to_reeval = []
 for i in range(ITERATIONS):
     if i >= 1:
         evidence_to_reeval.append(i)
-        l = evidence_to_reeval[:]
+        l = evidence_to_reeval[-3:-1]
 
         has_processed = False
 
-        if(i > 1500):
+        if(i > 150):
             reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
             has_processed = True
 
-        if(i > 1000 and not has_processed):
+        if(i > 100 and not has_processed):
             reevaluations.append(ReevaluationOfPriorEvidence(i, l, .48, .52))
             has_processed = True
 
-        if(i > 500 and not has_processed):
+        if(i > 50 and not has_processed):
             reevaluations.append(ReevaluationOfPriorEvidence(i, l, .49, .51))
             has_processed = True
 
         if(not has_processed):
             reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
 
-
 for r in reevaluations:
     DEBUG_REEVALS.append(r)
 
-results4 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
+results1 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
 # exit(66)
 
@@ -306,44 +298,123 @@ reevaluations = []
 evidence_to_reeval = []
 for i in range(ITERATIONS):
     if i >= 1:
-        if(i % 10 == 0):
+        if(i % 5 == 0):
             evidence_to_reeval.append(i)
-            l = evidence_to_reeval[:]
+            l = evidence_to_reeval[-3:-1]
 
             has_processed = False
 
-            if(i > 1500):
+            if(i > 150):
                 reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
                 has_processed = True
 
-            if(i > 1000 and not has_processed):
+            if(i > 100 and not has_processed):
                 reevaluations.append(ReevaluationOfPriorEvidence(i, l, .48, .52))
                 has_processed = True
 
-            if(i > 500 and not has_processed):
+            if(i > 50 and not has_processed):
                 reevaluations.append(ReevaluationOfPriorEvidence(i, l, .49, .51))
                 has_processed = True
 
             if(not has_processed):
                 reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
 
+results2 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
+
+
+reevaluations = []
+evidence_to_reeval = []
+for i in range(ITERATIONS):
+    if i >= 1:
+        if(i % 13 == 0):
+            evidence_to_reeval.append(i)
+            l = evidence_to_reeval[-3:-1]
+
+            has_processed = False
+
+            if(i > 150):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
+                has_processed = True
+
+            if(i > 100 and not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .48, .52))
+                has_processed = True
+
+            if(i > 50 and not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .49, .51))
+                has_processed = True
+
+            if(not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
+
+results3 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
+
+reevaluations = []
+evidence_to_reeval = []
+for i in range(ITERATIONS):
+    if i >= 1:
+        if(i % 28 == 0):
+            evidence_to_reeval.append(i)
+            l = evidence_to_reeval[-3:-1]
+
+            has_processed = False
+
+            if(i > 150):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
+                has_processed = True
+
+            if(i > 100 and not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .48, .52))
+                has_processed = True
+
+            if(i > 50 and not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .49, .51))
+                has_processed = True
+
+            if(not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
+
+results4 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
+
+reevaluations = []
+evidence_to_reeval = []
+for i in range(ITERATIONS):
+    if i >= 1:
+        if(i % 48 == 0):
+            evidence_to_reeval.append(i)
+            l = evidence_to_reeval[-3:-1]
+
+            has_processed = False
+
+            if(i > 150):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
+                has_processed = True
+
+            if(i > 100 and not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .48, .52))
+                has_processed = True
+
+            if(i > 50 and not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .49, .51))
+                has_processed = True
+
+            if(not has_processed):
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
 
 results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
-
 with open("output.txt", "w") as f:
-    # f.write("E  ,Bayes,Single,Iterative,LookbackSingle,LookbackIterative\n")
+    #f.write("E  ,Bayes,Single,Iterative,LookbackSingle,LookbackIterative\n")
     for i in range(ITERATIONS):
         f.write("{0:03d}".format(i) + "," +
-                # "{:5f}".format(results1[i].posterior_h_1) + "," +
-                # "{:5f}".format(results2[i].posterior_h_1) + "," +
-                # "{:5f}".format(results3[i].posterior_h_1) + "," +
-                "{:5f}".format(results4[i].posterior_h_1) + ","
-                # "{:5f}".format(results5[i].posterior_h_1) + ","
-                + "\n")
+                "{:5f}".format(results1[i].posterior_h_1) + "," +
+                "{:5f}".format(results2[i].posterior_h_1) + "," +
+                "{:5f}".format(results3[i].posterior_h_1) + "," +
+                "{:5f}".format(results4[i].posterior_h_1) + "," +
+                "{:5f}".format(results5[i].posterior_h_1) + "\n")
 
 with open("output_reevals.txt", "w") as f:
-    f.write("causing_evidence_postion, prior_evidence_positions_to_be_updated, variance_h_1, variance_h_2")
+    f.write("causing_evidence_postion, prior_evidence_positions_to_be_updated, variance_h_1, variance_h_2\n")
     for r in DEBUG_REEVALS:
         f.write(str(r.causing_evidence_postion) + "," + str(r.prior_evidence_positions_to_be_updated) + "," + str(r.variance_h_1) + "," + str(r.variance_h_2) + "\n")
 
