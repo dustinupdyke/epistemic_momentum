@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
 # import matplotlib.pyplot as plt
+import os
+import shutil
 from decimal import *
-import random
-from copy import deepcopy
 
 
 class ReevaluationOfPriorEvidence:
@@ -315,8 +315,10 @@ for i in range(ITERATIONS):
 
 results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
+shutil.rmtree("output")
+os.makedirs("output")
 
-with open("output.txt", "w") as f:
+with open("output/results.txt", "w") as f:
     # f.write("E  ,Bayes,Single,Iterative,LookbackSingle,LookbackIterative\n")
     for i in range(ITERATIONS):
         f.write("{0:03d}".format(i) + "," +
@@ -326,15 +328,15 @@ with open("output.txt", "w") as f:
                 "{:5f}".format(results4[i].posterior_h_1) + "," +
                 "{:5f}".format(results5[i].posterior_h_1) + "\n")
 
-with open("output_reevals.txt", "w") as f:
+with open("output/output_reevals.txt", "w") as f:
     f.write("causing_evidence_postion, prior_evidence_positions_to_be_updated, variance_h_1, variance_h_2")
     for r in DEBUG_REEVALS:
         f.write(str(r.causing_evidence_postion) + "," + str(r.prior_evidence_positions_to_be_updated) + "," + str(r.variance_h_1) + "," + str(r.variance_h_2) + "\n")
 
-with open("output_raw_debug.txt", "w") as f:
+with open("output/output_raw_debug.txt", "w") as f:
     f.write("i,iter,likelihood_h_1,prior_h_1,b.posterior_h_1,prior_h_2,posterior_h_2")
     for o in DEBUG_RAW:
         f.write(o + "\n")
 
-print("Output file written")
+print("Results written successfully")
 exit(0)
