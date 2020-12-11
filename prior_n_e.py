@@ -166,7 +166,7 @@ ITERATIONS = 200
 PRIOR_H_1 = .5
 PRIOR_H_2 = .5
 
-DEBUG = False
+DEBUG = True
 DEBUG_RAW = []
 DEBUG_EVIDENCE = []
 
@@ -185,28 +185,28 @@ for i in range(ITERATIONS):
 
     has_processed = False
     if(i > 149):
-        evidences2.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-3:-1], .51, .49))
-        evidences3.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-11:-1], .51, .49))
-        evidences4.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-26:-1], .51, .49))
-        evidences5.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-51:-1], .51, .49))
+        evidences2.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-6:-1], .51, .49))
+        evidences3.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-26:-1], .51, .49))
+        evidences4.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-51:-1], .51, .49))
+        evidences5.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[:], .51, .49))
         has_processed = True
     if(i > 99 and not has_processed):
-        evidences2.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval[-3:-1], .48, .52))
-        evidences3.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval[-11:-1], .48, .52))
-        evidences4.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval[-26:-1], .48, .52))
-        evidences5.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval[-51:-1], .48, .52))
+        evidences2.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval[-6:-1], .48, .52))
+        evidences3.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval[-26:-1], .48, .52))
+        evidences4.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval[-51:-1], .48, .52))
+        evidences5.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval[:], .48, .52))
         has_processed = True
     if(i > 49 and not has_processed):
-        evidences2.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[-3:-1], .49, .51))
-        evidences3.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[-11:-1], .49, .51))
-        evidences4.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[-26:-1], .49, .51))
-        evidences5.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[-51:-1], .49, .51))
+        evidences2.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[-6:-1], .49, .51))
+        evidences3.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[-26:-1], .49, .51))
+        evidences4.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[-51:-1], .49, .51))
+        evidences5.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[:], .49, .51))
         has_processed = True
     if(not has_processed):
-        evidences2.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-3:-1], .51, .49))
-        evidences3.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-11:-1], .51, .49))
-        evidences4.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-26:-1], .51, .49))
-        evidences5.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-51:-1], .51, .49))
+        evidences2.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-6:-1], .51, .49))
+        evidences3.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-26:-1], .51, .49))
+        evidences4.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[-51:-1], .51, .49))
+        evidences5.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval[:], .51, .49))
 
 if DEBUG:
     for e in evidences1:
