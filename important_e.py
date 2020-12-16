@@ -171,49 +171,66 @@ evidences2 = []
 evidences3 = []
 evidences4 = []
 evidences5 = []
-reevaluations = []
-evidence_to_reeval1 = []
-evidence_to_reeval2 = []
-evidence_to_reeval3 = []
-evidence_to_reeval4 = []
-evidence_to_reeval5 = []
+not_reevaluated_beliefs = [13, 26, 39]
+evidence_to_reeval = []
 for i in range(ITERATIONS):
+
+    evidence_to_reeval.append(i)
 
     evidences1.append(Evidence(i, .51, .49, .5, .5, [], .51, .49))
 
-    if(i % 5 == 0):
-        evidence_to_reeval2.append(i)
-    if(i % 13 == 0):
-        evidence_to_reeval3.append(i)
-    if(i % 26 == 0):
-        evidence_to_reeval4.append(i)
-    if(i % 51 == 0):
-        evidence_to_reeval5.append(i)
-
     has_processed = False
-    if(i > 149):
-        evidences2.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval2[-3:-1], .51, .49))
-        evidences3.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval3[-3:-1], .51, .49))
-        evidences4.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval4[-3:-1], .51, .49))
-        evidences5.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval5[-3:-1], .51, .49))
+
+    if i in not_reevaluated_beliefs:
+        evidences2.append(Evidence(i, .35, .65, .5, .5, [], .49, .51))
+        evidences3.append(Evidence(i, .25, .75, .5, .5, [], .49, .51))
+        evidences4.append(Evidence(i, .15, .85, .5, .5, [], .49, .51))
+        evidences5.append(Evidence(i, 0.5, .95, .5, .5, [], .49, .51))
         has_processed = True
+
     if(i > 99 and not has_processed):
-        evidences2.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval2[-3:-1], .48, .52))
-        evidences3.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval3[-3:-1], .48, .52))
-        evidences4.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval4[-3:-1], .48, .52))
-        evidences5.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval5[-3:-1], .48, .52))
-        has_processed = True
-    if(i > 49 and not has_processed):
-        evidences2.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval2[-3:-1], .49, .51))
-        evidences3.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval3[-3:-1], .49, .51))
-        evidences4.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval4[-3:-1], .49, .51))
-        evidences5.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval5[-3:-1], .49, .51))
+
+        l = evidence_to_reeval[:]
+        l1 = [x for x in l if x not in not_reevaluated_beliefs]
+
+        evidences2.append(Evidence(i, .49, .51, .5, .5, l1, .49, .51))
+
+        l = evidence_to_reeval[-6:-1]
+        l1 = [x for x in l if x not in not_reevaluated_beliefs]
+
+        evidences3.append(Evidence(i, .49, .51, .5, .5, l1, .49, .51))
+
+        l = evidence_to_reeval[-26:-1]
+        l1 = [x for x in l if x not in not_reevaluated_beliefs]
+
+        evidences4.append(Evidence(i, .49, .51, .5, .5, l1, .49, .51))
+
+        l = evidence_to_reeval[-51:-1]
+        l1 = [x for x in l if x not in not_reevaluated_beliefs]
+
+        evidences5.append(Evidence(i, .49, .51, .5, .5, l1, .49, .51))
         has_processed = True
     if(not has_processed):
-        evidences2.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval2[-3:-1], .51, .49))
-        evidences3.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval3[-3:-1], .51, .49))
-        evidences4.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval4[-3:-1], .51, .49))
-        evidences5.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval5[-3:-1], .51, .49))
+
+        l = evidence_to_reeval[:]
+        l1 = [x for x in l if x not in not_reevaluated_beliefs]
+
+        evidences2.append(Evidence(i, .51, .49, .5, .5, l1, .51, .49))
+
+        l = evidence_to_reeval[-6:-1]
+        l1 = [x for x in l if x not in not_reevaluated_beliefs]
+
+        evidences3.append(Evidence(i, .51, .49, .5, .5, l1, .51, .49))
+
+        l = evidence_to_reeval[-26:-1]
+        l1 = [x for x in l if x not in not_reevaluated_beliefs]
+
+        evidences4.append(Evidence(i, .51, .49, .5, .5, l1, .51, .49))
+
+        l = evidence_to_reeval[-51:-1]
+        l1 = [x for x in l if x not in not_reevaluated_beliefs]
+
+        evidences5.append(Evidence(i, .51, .49, .5, .5, l1, .51, .49))
 
 if DEBUG:
     for e in evidences1:

@@ -76,10 +76,6 @@ def lookback(evidences, is_debug=False):
     items = []
     for i, evidence in enumerate(evidences):
 
-        is_debug = False
-        if i == 50 or i == 75:
-            is_debug = True
-
         if i == 0:
             prior_h_1 = evidence.prior_h_1
             prior_h_2 = evidence.prior_h_2
@@ -228,7 +224,8 @@ results3 = lookback(evidences3, DEBUG)
 results4 = lookback(evidences4, DEBUG)
 results5 = lookback(evidences5, DEBUG)
 
-shutil.rmtree("output")
+if os.path.isdir("output"):
+    shutil.rmtree("output")
 os.makedirs("output")
 
 with open("output/results.txt", "w") as f:

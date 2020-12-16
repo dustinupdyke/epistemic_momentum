@@ -315,7 +315,8 @@ for i in range(ITERATIONS):
 
 results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
-shutil.rmtree("output")
+if os.path.isdir("output"):
+    shutil.rmtree("output")
 os.makedirs("output")
 
 with open("output/results.txt", "w") as f:

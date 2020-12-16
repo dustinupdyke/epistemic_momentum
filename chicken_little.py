@@ -76,6 +76,10 @@ def lookback(evidences, is_debug=False):
     items = []
     for i, evidence in enumerate(evidences):
 
+        is_debug = False
+        if i == 50 or i == 75:
+            is_debug = True
+
         if i == 0:
             prior_h_1 = evidence.prior_h_1
             prior_h_2 = evidence.prior_h_2
@@ -172,48 +176,32 @@ evidences3 = []
 evidences4 = []
 evidences5 = []
 reevaluations = []
-evidence_to_reeval1 = []
-evidence_to_reeval2 = []
-evidence_to_reeval3 = []
-evidence_to_reeval4 = []
-evidence_to_reeval5 = []
+evidence_to_reeval = []
+big_reevaluations = [13, 26, 39]
+
 for i in range(ITERATIONS):
 
-    evidences1.append(Evidence(i, .51, .49, .5, .5, [], .51, .49))
+    evidence_to_reeval.append(i)
 
-    if(i % 5 == 0):
-        evidence_to_reeval2.append(i)
-    if(i % 13 == 0):
-        evidence_to_reeval3.append(i)
-    if(i % 26 == 0):
-        evidence_to_reeval4.append(i)
-    if(i % 51 == 0):
-        evidence_to_reeval5.append(i)
+    evidences1.append(Evidence(i, .49, .51, .5, .5, [], .51, .49))
 
     has_processed = False
-    if(i > 149):
-        evidences2.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval2[-3:-1], .51, .49))
-        evidences3.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval3[-3:-1], .51, .49))
-        evidences4.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval4[-3:-1], .51, .49))
-        evidences5.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval5[-3:-1], .51, .49))
-        has_processed = True
+
     if(i > 99 and not has_processed):
-        evidences2.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval2[-3:-1], .48, .52))
-        evidences3.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval3[-3:-1], .48, .52))
-        evidences4.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval4[-3:-1], .48, .52))
-        evidences5.append(Evidence(i, .48, .52, .5, .5, evidence_to_reeval5[-3:-1], .48, .52))
-        has_processed = True
-    if(i > 49 and not has_processed):
-        evidences2.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval2[-3:-1], .49, .51))
-        evidences3.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval3[-3:-1], .49, .51))
-        evidences4.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval4[-3:-1], .49, .51))
-        evidences5.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval5[-3:-1], .49, .51))
+
+        l = evidence_to_reeval[:]
+        l1 = [x for x in l if x in big_reevaluations]
+
+        evidences2.append(Evidence(i, .51, .49, .5, .5, l1, .65, .35))
+        evidences3.append(Evidence(i, .51, .49, .5, .5, l1, .75, .25))
+        evidences4.append(Evidence(i, .51, .49, .5, .5, l1, .85, .15))
+        evidences5.append(Evidence(i, .51, .49, .5, .5, l1, .95, .05))
         has_processed = True
     if(not has_processed):
-        evidences2.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval2[-3:-1], .51, .49))
-        evidences3.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval3[-3:-1], .51, .49))
-        evidences4.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval4[-3:-1], .51, .49))
-        evidences5.append(Evidence(i, .51, .49, .5, .5, evidence_to_reeval5[-3:-1], .51, .49))
+        evidences2.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[:], .49, .51))
+        evidences3.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[:], .49, .51))
+        evidences4.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[:], .49, .51))
+        evidences5.append(Evidence(i, .49, .51, .5, .5, evidence_to_reeval[:], .49, .51))
 
 if DEBUG:
     for e in evidences1:
@@ -227,7 +215,7 @@ if DEBUG:
     for e in evidences5:
         DEBUG_EVIDENCE.append(e.__dict__)
 
-results0 = bayes(.51, PRIOR_H_1, .49, PRIOR_H_2, ITERATIONS)
+results0 = bayes(.49, PRIOR_H_1, .51, PRIOR_H_2, ITERATIONS)
 
 results1 = lookback(evidences1, DEBUG)
 results2 = lookback(evidences2, DEBUG)
