@@ -97,22 +97,22 @@ def iterative(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, 
 
             has_processed = False
             if(i > 1500):
-                likelihood_h_1 = .51
-                likelihood_h_2 = .49
+                likelihood_h_1 = .90
+                likelihood_h_2 = .10
                 has_processed = True
             if(i > 1000 and not has_processed):
-                likelihood_h_1 = .48
-                likelihood_h_2 = .52
+                likelihood_h_1 = .05
+                likelihood_h_2 = .95
                 has_processed = True
 
             if(i > 500 and not has_processed):
-                likelihood_h_1 = .49
-                likelihood_h_2 = .51
+                likelihood_h_1 = .10
+                likelihood_h_2 = .90
                 has_processed = True
 
             if(not has_processed):
-                likelihood_h_1 = .51
-                likelihood_h_2 = .49
+                likelihood_h_1 = .90
+                likelihood_h_2 = .10
 
             # likelihood_h_1 = normalize(likelihood_h_1 + variance_h_1)
             # likelihood_h_2 = normalize(likelihood_h_2 + variance_h_2)
@@ -147,20 +147,20 @@ def lookback(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations, r
 
         has_processed = False
         if(i > 1499):
-            original_likelihood_h_1 = .51
-            original_likelihood_h_2 = .49
+            original_likelihood_h_1 = .90
+            original_likelihood_h_2 = .10
             has_processed = True
         if(i > 999 and not has_processed):
-            original_likelihood_h_1 = .48
-            original_likelihood_h_2 = .52
+            original_likelihood_h_1 = .05
+            original_likelihood_h_2 = .95
             has_processed = True
         if(i > 499 and not has_processed):
-            original_likelihood_h_1 = .49
-            original_likelihood_h_2 = .51
+            original_likelihood_h_1 = .10
+            original_likelihood_h_2 = .90
             has_processed = True
         if(not has_processed):
-            original_likelihood_h_1 = .51
-            original_likelihood_h_2 = .49
+            original_likelihood_h_1 = .90
+            original_likelihood_h_2 = .10
 
         print("Processing lookback" + str(i), end='\r')
         reevaluation = None
@@ -243,8 +243,8 @@ print("""
 getcontext().prec = 5
 
 ITERATIONS = 2000
-LIKELIHOOD_H_1 = .51
-LIKELIHOOD_H_2 = .49
+LIKELIHOOD_H_1 = .90
+LIKELIHOOD_H_2 = .10
 PRIOR_H_1 = .5
 PRIOR_H_2 = .5
 ITERATIONTOSTARTREEVALUATION = 2
@@ -258,13 +258,14 @@ DEBUG_REEVALS = []
 # if (DEBUG):
 #     print("i,update_i,likelihood_h_1,lookback_item.prior_h_1,lookback_item.posterior_h_1,lookback_item.prior_h_2,lookback_item.posterior_h_2")
 
-results1 = bayes(.51, PRIOR_H_1, .49, PRIOR_H_2, ITERATIONS)
-results2 = iterative(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
+results1 = bayes(.90, PRIOR_H_1, .10, PRIOR_H_2, ITERATIONS)
+results2 = bayes(.10, PRIOR_H_1, .90, PRIOR_H_2, ITERATIONS)
+
+
+results3 = iterative(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS,
                      ITERATIONTOSTARTREEVALUATION, REEVALUATION_H_1, REEVALUATION_H_2)
 
-
 reevaluations = []
-reevaluations2 = []
 evidence_to_reeval = []
 for i in range(ITERATIONS):
     if i >= 1:
@@ -273,25 +274,19 @@ for i in range(ITERATIONS):
 
         has_processed = False
         if(i > 1499):
-            reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
-            reevaluations2.append(ReevaluationOfPriorEvidence(i, l, .90, .10))
+            reevaluations.append(ReevaluationOfPriorEvidence(i, l, .90, .10))
             has_processed = True
         if(i > 999 and not has_processed):
-            reevaluations.append(ReevaluationOfPriorEvidence(i, l, .48, .52))
-            reevaluations2.append(ReevaluationOfPriorEvidence(i, l, .95, .05))
+            reevaluations.append(ReevaluationOfPriorEvidence(i, l, .05, .95))
             has_processed = True
         if(i > 499 and not has_processed):
-            reevaluations.append(ReevaluationOfPriorEvidence(i, l, .49, .51))
-            reevaluations2.append(ReevaluationOfPriorEvidence(i, l, .10, .90))
+            reevaluations.append(ReevaluationOfPriorEvidence(i, l, .10, .90))
             has_processed = True
         if(not has_processed):
-            reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
-            reevaluations2.append(ReevaluationOfPriorEvidence(i, l, .90, .10))
+            reevaluations.append(ReevaluationOfPriorEvidence(i, l, .90, .10))
 
 for r in reevaluations:
     DEBUG_REEVALS.append(r)
-
-results3 = lookback(.90, PRIOR_H_1, .10, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
 results4 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
@@ -307,16 +302,16 @@ for i in range(ITERATIONS):
 
             has_processed = False
             if(i > 1499):
-                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .90, .10))
                 has_processed = True
             if(i > 999 and not has_processed):
-                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .48, .52))
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .05, .95))
                 has_processed = True
             if(i > 499 and not has_processed):
-                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .49, .51))
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .10, .90))
                 has_processed = True
             if(not has_processed):
-                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .51, .49))
+                reevaluations.append(ReevaluationOfPriorEvidence(i, l, .90, .10))
 
 results5 = lookback(LIKELIHOOD_H_1, PRIOR_H_1, LIKELIHOOD_H_2, PRIOR_H_2, ITERATIONS, reevaluations, DEBUG)
 
