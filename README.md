@@ -23,3 +23,8 @@ In particular, if clear evidence follows initial ambiguity, then how does our re
 Currently file per experiment.
 
 From this directory, `python|3 baseline.py` will write to output directory. output/results.txt is the matrix of numbers that should generate the correct curve.
+
+### Mappings
+
+3.1g = baseline_2vars
+3.1h = baseline_2vars_strong

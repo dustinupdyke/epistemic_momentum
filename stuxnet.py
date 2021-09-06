@@ -12,6 +12,14 @@ for the same hypothesis H_1, one of high probability and one of low.
 """
 
 
+class ReevaluationOfPriorEvidence:
+    def __init__(self, causing_evidence_postion, prior_evidence_positions_to_be_updated, variance_h_1, variance_h_2):
+        self.causing_evidence_postion = causing_evidence_postion
+        self.prior_evidence_positions_to_be_updated = prior_evidence_positions_to_be_updated
+        self.variance_h_1 = variance_h_1
+        self.variance_h_2 = variance_h_2
+
+
 class BayesItem:
     """
     The item we'll calculate on
@@ -45,50 +53,63 @@ class BayesItem:
         self.posterior_h_2 = normalize(self.posterior_h_2)
 
 
-def bayes(likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2, iterations):
-    """
-    straight iterative bayes calculation, where priors become the previous posterior
-    """
-    items = []
-    for i in range(iterations):
-        b = BayesItem(i, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
-        items.append(b)
-        # priors for the next are this iterations posterior
-        prior_h_1 = b.posterior_h_1
-        prior_h_2 = b.posterior_h_2
-    return items
-
-
-def iterative(iterations, new_h_1, p):
+def iterative(stuxnet=False):
     """
     Continue to update in the same one fashion until convergence
     So for each iteration above our belief change, we recalculate likelihoods
     """
+    iterations = 2000
+    chance_likelihood_increases = 50  # 50%
+    chance_of_reset = 5
 
-    likelihood_h_1 = .51
+    likelihood_h_1 = .50
     prior_h_1 = .50
-    likelihood_h_2 = .49
+    likelihood_h_2 = .50
     prior_h_2 = .50
 
     items = []
+    resets = []
     print("")
+    count_resets = 0
+    count_stuxnet = 0
     for i in range(iterations):
         print("Processing iterative" + str(i), end='\r')
 
+        """
+        P(f) = c(x(t)) * .001 every t there is a chance of wear
+        every x(t) % of manual check, resets P(f) to 0
+        """
         has_processed = False
-        if(percent_of_the_time(p)):
-            likelihood_h_1 = new_h_1
+        likelihood_increases = percent_of_the_time(chance_likelihood_increases)
+        if likelihood_increases:
+            likelihood_h_1 = likelihood_h_1 + .000575
             likelihood_h_2 = 1 - likelihood_h_1
-            has_processed = True
 
-        if(not has_processed):
-            likelihood_h_1 = .51
-            likelihood_h_2 = .49
+        if(percent_of_the_time(chance_of_reset)):  # reset via manual investigation
+            count_resets += 1
+            likelihood_h_1 = .495
+            likelihood_h_2 = .505
+            resets.append(i)
+
+        # stuxnet intervention
+        if(stuxnet and likelihood_h_1 > .51 and likelihood_increases):
+            count_stuxnet += 1
+            likelihood_h_1 = likelihood_h_1 - .02
+            likelihood_h_2 = 1 - likelihood_h_1
+
+        original_likelihood_h_1 = likelihood_h_1
+        original_likelihood_h_2 = likelihood_h_2
+
+        likelihood_h_1 = original_likelihood_h_1
+        likelihood_h_2 = original_likelihood_h_2
+
+        # now how to incorporate the lookback with resets and such
 
         b = BayesItem(i, likelihood_h_1, prior_h_1, likelihood_h_2, prior_h_2)
         items.append(b)
         prior_h_1 = b.posterior_h_1
         prior_h_2 = b.posterior_h_2
+    print("\nresets {} stuxnet {}".format(count_resets, count_stuxnet))
     return items
 
 
@@ -120,7 +141,7 @@ print("""
 
 getcontext().prec = 5
 
-ITERATIONS = 200
+ITERATIONS = 2000
 PRIOR_H_1 = .5
 PRIOR_H_2 = .5
 
@@ -129,31 +150,17 @@ DEBUG_RAW = []
 DEBUG_REEVALS = []
 
 # i want to build the array of E and their likelihoods here, and pass them into a simple function of calculation....
-
-# results1 = bayes(.51, PRIOR_H_1, .49, PRIOR_H_2, ITERATIONS)
-# results2 = iterative(ITERATIONS, .49, 10)
-# results3 = iterative(ITERATIONS, .49, 20)
-# results4 = iterative(ITERATIONS, .49, 30)
-# results5 = iterative(ITERATIONS, .49, 40)
-# results6 = iterative(ITERATIONS, .49, 50)
-# results7 = iterative(ITERATIONS, .49, 60)
-# results8 = iterative(ITERATIONS, .49, 70)
-# results9 = iterative(ITERATIONS, .49, 80)
-# results10 = iterative(ITERATIONS, .49, 90)
-# results11 = iterative(ITERATIONS, .49, 100)
-
-
-results1 = bayes(.51, PRIOR_H_1, .49, PRIOR_H_2, ITERATIONS)
-results2 = iterative(ITERATIONS, .49, 10)
-results3 = iterative(ITERATIONS, .4, 10)
-results4 = iterative(ITERATIONS, .35, 10)
-results5 = iterative(ITERATIONS, .3, 10)
-results6 = iterative(ITERATIONS, .25, 10)
-results7 = iterative(ITERATIONS, .2, 10)
-results8 = iterative(ITERATIONS, .15, 10)
-results9 = iterative(ITERATIONS, .1, 10)
-results10 = iterative(ITERATIONS, .05, 10)
-results11 = iterative(ITERATIONS, .01, 10)
+results1 = iterative()
+results2 = iterative()
+results3 = iterative()
+results4 = iterative()
+results5 = iterative()
+results6 = iterative()
+results7 = iterative()
+results8 = iterative()
+results9 = iterative() # stuxnet=False
+results10 = iterative()
+results11 = iterative(True)
 
 
 if os.path.isdir("output"):
