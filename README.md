@@ -1,6 +1,8 @@
 # Epistemic Momentum
 
-Epistemic Momentum is the phenomenon with regards to an agent’s coming to some belief whereby the inclusion of the re-evaluation of past evidence provides a potentially different probability outcome than a similar evaluation of a single piece of evidence in a vacuum.
+Epistemic Momentum is code name for my MS Thesis that states: 
+
+Adversarial attacks seeking to specifically undermine foundational trust within human- machine teams raise concerns of stability and safety for learning and inference systems in military, healthcare, finance, and other domains.
 
 ```
 ________  ____    ____
